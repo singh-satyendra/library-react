@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: libraryservicedeployment
+spec:
+  selector:
+    matchLabels:
+      app: libraryservice
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: libraryservice
+    spec:
+      containers:
+      - image: us.icr.io/ssingh/libraryservice:1.0
+        name: libraryservice
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+        
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 9001
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 3
+          failureThreshold: 1
+          
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 9001
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 3
+          failureThreshold: 1  
+              
+        env:
+          - name: bookinventory.endpoint
+            valueFrom:
+              configMapKeyRef:
+                name: librarycm
+                key: bookinventory.endpoint
+                
+      restartPolicy: Always
