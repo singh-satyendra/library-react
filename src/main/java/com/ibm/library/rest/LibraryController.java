@@ -9,18 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-
 import com.ibm.library.service.LibraryService;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.util.Collection;
-
 import com.ibm.library.model.BookData;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //http://169.51.194.138:30081/actuator/health
@@ -33,10 +27,10 @@ public class LibraryController {
 
 	@Autowired
 	private LibraryService libraryService;
-
+	
 	public LibraryController() {
 	}
-
+	
 	// Get book by isbn
 	@RequestMapping(value = "/book/{isbn}")
 	public ResponseEntity<?> getBook(@PathVariable(value = "isbn") String isbn) {
@@ -125,44 +119,45 @@ public class LibraryController {
 	// get all books from bookinventory endpoint using retrieve method
 	
 	@RequestMapping(value = "/webbooks", method = RequestMethod.GET)
-	public ResponseEntity<Flux<BookData>> getBooksRetrieve() {
+	public Flux<BookData> getBooksRetrieve() {
     	Flux<BookData> books = this.libraryService.getBooksRetrieve();
-    	HttpStatus status = books != null ? HttpStatus.OK : HttpStatus.NOT_FOUND;
-        return new ResponseEntity<Flux<BookData>>(books, status);
+    	//HttpStatus status = books != null ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        return books;
 	}
 
 	// get all books from bookinventory endpoint using exchange method
 	
 	@RequestMapping(value = "/booksExchange", method = RequestMethod.GET)
-	public ResponseEntity<Flux<BookData>> getBooksExchange() {
+	public Flux<BookData> getBooksExchange() {
     	Flux<BookData> books = this.libraryService.getBooksExchange();
-    	HttpStatus status = books != null ? HttpStatus.OK : HttpStatus.NOT_FOUND;
-        return new ResponseEntity<Flux<BookData>>(books, status);
+        return books;
 	}
 
 	
-	// get book by Isbn from bookinventory endpoint
-	@RequestMapping(value = "/webbook/{isbn}", method = RequestMethod.GET)
-	public Mono<ResponseEntity<BookData>> getBookByIsbn(@PathVariable String isbn) {
-		System.out.println("get book by isbn");
-		return libraryService.getBookByIsbn(isbn)
-				.map((book) -> new ResponseEntity<>(book , HttpStatus.OK));
-				//.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-	}
-
+	// get book by Isbn from bookinventory endpoint	  
+	  @RequestMapping(value = "/webbook/{isbn}", method = RequestMethod.GET)
+	  public Mono<ResponseEntity<BookData>> getBookByIsbn(@PathVariable String isbn) {
+	  System.out.println("get book by isbn"); 
+	  return libraryService.getBookByIsbn(isbn)
+	                       .map(bookdata -> ResponseEntity.ok(bookdata))
+	                       .defaultIfEmpty(ResponseEntity.notFound().build());
+	  }
+	
+	
 	// create book
 	@RequestMapping(value = "/webbook", method = RequestMethod.POST)
 	public Mono<ResponseEntity<BookData>> createBookWebClient(@RequestBody BookData book) {
 		return libraryService.createBookWebClient(book)
-				.map((bookweb) -> new ResponseEntity<>(bookweb,HttpStatus.CREATED));
+				             .map(bookdata -> ResponseEntity.ok(bookdata))
+		                     .defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 	
-	//update book
-	@RequestMapping(value = "/webbook/{isbn}" , method = RequestMethod.PUT)
-	public Mono<ResponseEntity<BookData>> updateBookWebClient(@RequestBody BookData book ){
+	//update book. Not the clean way
+	@RequestMapping(value = "/webbook" , method = RequestMethod.PUT)
+	public Mono<ResponseEntity<BookData>> updateBookWebClient(@RequestBody BookData book){
 		return libraryService.updateBookWebClient(book)
-				.map( (bookData) -> new ResponseEntity<>(bookData,HttpStatus.OK));
-				//.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+				             .map(bookdata -> ResponseEntity.ok(bookdata))
+		                     .defaultIfEmpty(ResponseEntity.notFound().build());
 		
 	}
 	
@@ -170,6 +165,7 @@ public class LibraryController {
 	@RequestMapping(value = "/webbook/{isbn}" , method = RequestMethod.DELETE)
 	public Mono<ResponseEntity<Void>> deleteBookWebClient(@PathVariable(value="isbn") String isbn){
 		return libraryService.deleteBookWebClient(isbn)
-				.map((book) -> new ResponseEntity<>(book, HttpStatus.OK));
+				             .map(bookdata -> ResponseEntity.ok(bookdata));
+		                     
 	}
 }

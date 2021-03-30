@@ -201,10 +201,10 @@ public class BookInventoryEndpointImpl implements BookInventoryEndpoint {
 	public Flux<BookData> getBooksRetrieve(){
 		return webClient
 		.get()
-		.uri(bookInventoryEndpoint+"/bookinventory/books")
+		.uri(bookInventoryEndpoint+"/bookinventory/fun/wcbooks")
 		.retrieve()
 		.bodyToFlux(BookData.class)
-		.log("*********************enter in book inventory webclient");
+		.log("enter in book inventory webclient");
 		
 	}
 	
@@ -213,12 +213,9 @@ public class BookInventoryEndpointImpl implements BookInventoryEndpoint {
 	public Mono<BookData> getBookByIsbn(String isbn){
 		return webClient
 				.get()
-				.uri(bookInventoryEndpoint+"/bookinventory/wcbook/{isbn}/",isbn)
+				.uri(bookInventoryEndpoint+"/bookinventory/fun/wcbook/{isbn}/",isbn)
 				.retrieve()
 				.bodyToMono(BookData.class);
-		        
-		        
-		
 	}
 	
 	//using exchange
@@ -239,7 +236,7 @@ public class BookInventoryEndpointImpl implements BookInventoryEndpoint {
 		Mono<BookData> book = Mono.just(books);
 		return webClient
 				.post()
-				.uri(bookInventoryEndpoint+"/bookinventory/wcbook")
+				.uri(bookInventoryEndpoint+"/bookinventory/fun/wcbook")
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(book , BookData.class)
                 .retrieve()
@@ -254,7 +251,7 @@ public class BookInventoryEndpointImpl implements BookInventoryEndpoint {
 		Mono<BookData> book = Mono.just(books);
 		return webClient
 				.put()
-				.uri(bookInventoryEndpoint+"/bookinventory/wcbook")
+				.uri(bookInventoryEndpoint+"/bookinventory/fun/wcbook")
 				.body(book, BookData.class)
 				.retrieve()
 				.bodyToMono(BookData.class)
@@ -267,7 +264,7 @@ public class BookInventoryEndpointImpl implements BookInventoryEndpoint {
 	public Mono<Void> deleteBookWebClient(String isbn){
 		return webClient
 				.delete()
-				.uri(bookInventoryEndpoint+"/bookinventory/wcbook/{isbn}/",isbn)
+				.uri(bookInventoryEndpoint+"/bookinventory/fun/wcbook/{isbn}/",isbn)
 			    .retrieve()
 				.bodyToMono(Void.class)
 				.log("book has been deleted with isbn" + isbn);
